@@ -1,102 +1,114 @@
 #include "lists.h"
 
-int going_in_circle(listint_t *lf, listint_t *end, int s);
-void map(listint_t **head);
 /**
-  * going_in_circle - function that checking for palindm
-  * @lf:- start point
-  * @s:- size of list
-  * @end:- end point
-  * Return:- Always 0
-  */
-
-int going_in_circle(listint_t *lf, listint_t *end, int s)
+ * reverse - reverses the second half of the list
+ *
+ * @h_r: head of the second half
+ * Return: no return
+ */
+void reverse(listint_t **h_r)
 {
-	int lap = 0;
+	listint_t *prv;
+	listint_t *crr;
+	listint_t *nxt;
 
-	if (lf == NULL || end == NULL)
-		return (1);
+	prv = NULL;
+	crr = *h_r;
 
-	for (; lap < s; lap++)
+	while (crr != NULL)
 	{
-		if (lf->n != end->n)
-			return (0);
-		lf = lf->next;
-		end = end->next;
+		nxt = crr->next;
+		crr->next = prv;
+		prv = crr;
+		crr = nxt;
 	}
 
-	return (1);
+	*h_r = prv;
 }
 
+/**
+ * compare - compares each int of the list
+ *
+ * @h1: head of the first half
+ * @h2: head of the second half
+ * Return: 1 if are equals, 0 if not
+ */
+int compare(listint_t *h1, listint_t *h2)
+{
+	listint_t *tmp1;
+	listint_t *tmp2;
+
+	tmp1 = h1;
+	tmp2 = h2;
+
+	while (tmp1 != NULL && tmp2 != NULL)
+	{
+		if (tmp1->n == tmp2->n)
+		{
+			tmp1 = tmp1->next;
+			tmp2 = tmp2->next;
+		}
+		else
+		{
+			return (0);
+		}
+	}
+
+	if (tmp1 == NULL && tmp2 == NULL)
+	{
+		return (1);
+	}
+
+	return (0);
+}
 
 /**
-  * is_palindrome - checking weather singly-linked list is
-  * @head:- start node of list
-  * Return:- Always 0
-  */
-
+ * is_palindrome - checks if a singly linked list
+ * is a palindrome
+ * @head: pointer to head of list
+ * Return: 0 if it is not a palindrome,
+ * 1 if it is a palndrome
+ */
 int is_palindrome(listint_t **head)
 {
-	int len = 0, j;
-	listint_t *dck;
-	listint_t *tmp;
+	listint_t *slow, *fast, *prev_slow;
+	listint_t *scn_half, *middle;
+	int isp;
 
-	if (head == NULL || *head == NULL)
+	slow = fast = prev_slow = *head;
+	middle = NULL;
+	isp = 1;
+
+	if (*head != NULL && (*head)->next != NULL)
 	{
-		return (1);
+		while (fast != NULL && fast->next != NULL)
+		{
+			fast = fast->next->next;
+			prev_slow = slow;
+			slow = slow->next;
+		}
+
+		if (fast != NULL)
+		{
+			middle = slow;
+			slow = slow->next;
+		}
+
+		scn_half = slow;
+		prev_slow->next = NULL;
+		reverse(&scn_half);
+		isp = compare(*head, scn_half);
+
+		if (middle != NULL)
+		{
+			prev_slow->next = middle;
+			middle->next = scn_half;
+		}
+		else
+		{
+			prev_slow->next = scn_half;
+		}
 	}
 
-	dck = *head;
-	tmp = *head;
-
-	for (; tmp != NULL; len++)
-		tmp = tmp->next;
-
-	len = len / 2;
-
-	for (j = 1; j < len; j++)
-	{
-		dck = dck->next;
-	}
-
-	if ((len % 2) != 0 && len != 1)
-	{
-		dck = dck->next;
-		len = len - 1;
-
-	}
-
-	map(&dck);
-	j = going_in_circle(*head, dck, len);
-
-	return (j);
-}
-
-/**
-  * map - function maps node and revese them
-  * @head:- head ptr
-  * Return:- Always 0
-  */
-
-void map(listint_t **head)
-{
-	listint_t *ran;
-	listint_t *prv;
-	listint_t *next;
-
-	if (head == NULL || *head == NULL)
-		return;
-
-	ran = *head;
-	prv = NULL;
-
-	while (ran != NULL)
-	{
-		next = ran->next;
-		ran->next = prv;
-		ran = next;
-
-	}
-
-	*head = prv;
+	return (isp);
 }
